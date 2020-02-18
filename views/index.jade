@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+
+  form#connection
+    input#coninput(type='text', required='required')
+    p#error
+    button(type='submit') Connect
+
+  form#chat
+    input#m(type='text', placeholder='hei')
+    button(type='submit') Send
+
+
+  div#history
