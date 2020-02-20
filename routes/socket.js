@@ -1,4 +1,5 @@
 const SocketServer = require('socket.io');
+const redisAdapter = require('socket.io-redis');
 
 const rooms = {
   '223455': 'e92e95f8-71cc-455d-9426-07744ea2b83d',
@@ -21,10 +22,16 @@ const handleSocketConnection = (io, socket) => {
   console.log(`RoomId: ${roomId}`);
 
   setTimeout(() => {
+    io.emit('hello', 'to all clients');
     // Simulate that the game-master started a game in a game room using
     io
     .to(`room-${roomId}`)
     .emit('game:start', { roomId, message: 'Game-master has started the game' });
+
+    // Check which clients are connected to this room
+    io.in(`room-${roomId}`).clients((err, clients) => {
+      console.log(clients); // an array containing socket ids in 'room-${roomId}'
+    });
   }, 10000);
 
   // const interval = setInterval(() => {
@@ -44,6 +51,7 @@ const handleSocketConnection = (io, socket) => {
 
 const initSocket = (server) => {
   const io = new SocketServer(server);
+  io.adapter(redisAdapter({ host: 'redis', port: 6379 }));
 
   // Authenticate connection
   // Will only run once per client-server connection

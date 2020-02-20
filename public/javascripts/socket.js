@@ -29,6 +29,10 @@ $('#connection').submit((evt) => {
     console.log(msg);
   });
 
+  socket.on('hello', (msg) => {
+    console.log(`Hello ${msg}`);
+  });
+
   $('#chat').submit((evt) => {
     evt.preventDefault();
 
