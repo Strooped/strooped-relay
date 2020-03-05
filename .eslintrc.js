@@ -9,8 +9,12 @@ module.exports = {
     "node": true,
     "jest": true
   },
-  "extends": "eslint:recommended",
+  "extends": [
+    "eslint:recommended",
+    "airbnb-base"
+  ],
   "rules": {
+    "comma-dangle": 0,
     "indent": [
       "error",
       2,
