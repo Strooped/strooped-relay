@@ -37,7 +37,7 @@ ESLint:
 Unit tests:
   image: node:12.13.0
   stage: test
-  script: npm run test:ci
+  script: npm run test:coverage
   coverage: /All\sfiles.*?\s+(\d+.\d+)/
   artifacts:
     paths:

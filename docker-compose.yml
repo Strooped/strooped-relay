@@ -11,6 +11,8 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - redis
+    environment:
+      NODE_ENV: development
     ports:
       - '3000:3000'
     volumes:
@@ -22,6 +24,8 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - redis
+    environment:
+      NODE_ENV: development
     ports:
       - '3001:3000'
     volumes:
