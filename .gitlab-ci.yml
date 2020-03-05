@@ -1,0 +1,64 @@
+image: docker:latest
+services:
+  - docker:dind
+
+variables:
+  KUBECONFIG: /etc/deploy/config
+  # Container name is dynamically determined by the project name. and tag is the last commit id
+  CONTAINER_NAME: lokalvert.tech/${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}
+  NODE_ENV: testing
+
+stages:
+  - install
+  - quality
+  - test
+  - auditing
+  - build
+  - push
+  - deploy
+
+cache:
+  paths:
+    - node_modules/
+
+Install dependencies:
+  image: node:12.13.0
+  stage: install
+  script: npm ci
+  artifacts:
+    paths:
+      - node_modules/
+
+ESLint:
+  image: node:12.13.0
+  stage: quality
+  script: npm run lint
+
+Unit tests:
+  image: node:12.13.0
+  stage: test
+  script: npm run test:ci
+  coverage: /All\sfiles.*?\s+(\d+.\d+)/
+  artifacts:
+    paths:
+      - coverage
+
+audit_dependencies:
+  stage: auditing
+  image: node:12.13.0
+  allow_failure: true
+  script:
+    - npm audit
+
+Build:
+  variables:
+    NODE_ENV: production
+  stage: build
+  script:
+    - echo "Building docker image $CONTAINER_NAME"
+    - docker build -t ${CONTAINER_NAME} .
+    # Push has to be in the same stage, because other stages might not get access to
+    # the same docker images
+    # - docker push ${CONTAINER_NAME}
+  # only:
+  #   - master
