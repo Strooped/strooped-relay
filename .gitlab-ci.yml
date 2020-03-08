@@ -54,6 +54,10 @@ Build:
   variables:
     NODE_ENV: production
   stage: build
+  before_script:
+    - df
+    - cat /etc/resolv.conf
+    - cat /etc/hosts
   script:
     - echo "Building docker image $CONTAINER_NAME"
     - docker build -t ${CONTAINER_NAME} .
