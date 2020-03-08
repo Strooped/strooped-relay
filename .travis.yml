@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+- '12.13.0'
+
+env:
+  global:
+    - KUBECONFIG="/etc/deploy/config"
+    - CONTAINER_NAME="lokalvert.tech/${TRAVIS_REPO_SLUG}:${TRAVIS_COMMIT}"
+
+jobs:
+  include:
+    - stage: Quality
+      name: "ESLint"
+      script: npm run lint
+    - stage: Test
+      name: "Unit-test"
+      script: npm run test:coverage
+    - stage: Dependency Audit
+      allow_failures:
+      - yes
+      script: npm audit
+
