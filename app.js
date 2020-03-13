@@ -3,6 +3,13 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const { initLogger, createExpressLogger, createExpressErrorLogger } = require('./utils/logger');
+const { getDbLazy } = require('./repository/database');
+const { synchronizeTables, populateDatabase } = require('./repository/migrate');
+
+const sequelize = getDbLazy();
+synchronizeTables(sequelize)
+  // .then(() => truncateTables(sequelize))
+  .then(() => populateDatabase(sequelize));
 
 const indexRouter = require('./routes/index');
 
@@ -20,6 +27,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 app.use('/', indexRouter);
 
