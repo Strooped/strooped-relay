@@ -5,14 +5,30 @@ services:
     ports:
       - '6379:6379'
 
+  db:
+    image: postgres:11
+    environment:
+      POSTGRES_DB: strooped
+    env_file:
+      - dev.env
+    volumes:
+      - databasevolume:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
   app1:
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
       - redis
+      - db
     environment:
       NODE_ENV: development
+      DB_HOST: db
+      POSTGRES_DB: strooped
+    env_file:
+      - dev.env
     ports:
       - '3000:3000'
     volumes:
@@ -24,9 +40,17 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - redis
+      - db
     environment:
       NODE_ENV: development
+      DB_HOST: db
+      POSTGRES_DB: strooped
+    env_file:
+      - dev.env
     ports:
       - '3001:3000'
     volumes:
       - .:/app
+
+volumes:
+  databasevolume:
