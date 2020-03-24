@@ -13,8 +13,8 @@ jobs:
   - stage: Test
     name: Unit-test
     script: npm run test:coverage
-  - stage: Dependency Audit
-    script: npm audit || true
+#  - stage: Dependency Audit
+#    script: npm audit || true
 before_install:
 - openssl aes-256-cbc -K $encrypted_be9d29cb2b88_key -iv $encrypted_be9d29cb2b88_iv
   -in deploy_key.enc -out ./deploy_key -d
