@@ -12,10 +12,8 @@ Game.init({
   type: DataTypes.STRING
 }, { sequelize, modelName: 'game' });
 
-function associate() {
+Game.associate = function associate() {
   Game.hasMany(GameMode);
-}
-
-Game.associate = associate();
+};
 
 module.exports = Game;
