@@ -32,7 +32,7 @@
     "socket.io": "^2.3.0",
     "socket.io-redis": "^5.2.0",
     "winston": "^3.2.1",
-    "snyk": "^1.303.2"
+    "snyk": "^1.304.0"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
