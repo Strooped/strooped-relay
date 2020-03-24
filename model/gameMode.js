@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const { getDbLazy } = require('../repository/database');
-const { Game } = require('./game');
+const Game = require('./game');
 
 const sequelize = getDbLazy();
 
