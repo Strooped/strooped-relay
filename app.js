@@ -12,6 +12,7 @@ synchronizeTables(sequelize)
   .then(() => populateDatabase(sequelize));
 
 const indexRouter = require('./routes/index');
+const gameModeRouter = require('./routes/gameMode');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use('/', indexRouter);
+app.use('/v1/gamemode', gameModeRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
