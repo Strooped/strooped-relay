@@ -6,6 +6,8 @@ const Game = require('../model/game');
 // eslint-disable-next-line no-unused-vars
 const GameRoom = require('../model/gameRoom');
 // eslint-disable-next-line no-unused-vars
+const GameMode = require('../model/gameMode');
+// eslint-disable-next-line no-unused-vars
 const Round = require('../model/round');
 // eslint-disable-next-line no-unused-vars
 const Task = require('../model/task');
@@ -34,6 +36,7 @@ const synchronizeTables = async (sequelize) => {
 
 const truncateTables = async () => {
   await GameRoom.destroy({ where: {} });
+  await GameMode.destroy({ where: {} });
   await Game.destroy({ where: {} });
   await Round.destroy({ where: {} });
   await Task.destroy({ where: {} });

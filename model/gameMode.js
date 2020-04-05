@@ -11,8 +11,6 @@ GameMode.init({
   description: DataTypes.TEXT,
   difficulty: DataTypes.INTEGER
 }, { sequelize, modelName: 'gameMode' });
-GameMode.associate = function associate() {
-  GameMode.belongsTo(Game);
-};
+GameMode.belongsTo(Game);
 
 module.exports = GameMode;
