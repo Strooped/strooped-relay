@@ -8,7 +8,12 @@ const gameRoomService = {
   createFromGame: async (gameModeId) => {
     const game = await gameModeService.findById(gameModeId).then((gameMode) => gameMode.getGame());
     return gameRoom.create({ joinPin: pinGenerator.generate(), gameId: game.id });
-  }
+  },
+  findFromPin: async (pin) => gameRoom.findOne({
+    where: {
+      joinPin: pin
+    }
+  })
 };
 
 module.exports = gameRoomService;

@@ -1,29 +1,27 @@
 const SocketServer = require('socket.io');
 const redisAdapter = require('socket.io-redis');
+const gameRoomService = require('../service/gameRoomService');
 const { initLogger } = require('../utils/logger');
 
 const logger = initLogger(module);
 
-const rooms = {
-  // eslint-disable-next-line quote-props
-  '223455': 'e92e95f8-71cc-455d-9426-07744ea2b83d',
-  // eslint-disable-next-line quote-props
-  '102345': 'c4bad8e3-3145-461a-9d28-1e9cacfb856b',
-  // eslint-disable-next-line quote-props
-  '987931': 'e29cc8f0-16c3-4c23-83ec-41224d77bf8d'
-};
-
-const getRoomId = (joinPin) => rooms[joinPin] || null;
+const getRoom = (joinPin) => Promise.resolve(gameRoomService.findFromPin(joinPin));
 
 const handleSocketConnection = (io, socket) => {
   const { token } = socket.handshake.query;
   logger.info('Client connecting...', { token });
 
-  const roomId = getRoomId(token);
+  const roomId = Promise.resolve(getRoom(token)).then((room) => {
+    if (!room) {
+      logger.warn('Token provided by client was not valid', { token });
+      return new Error('Invalid joinToken');
+    }
 
-  socket.join(`room-${roomId}`);
+    socket.join(`room-${room.id}`);
 
-  logger.info('Client connected successfully', { token, roomId });
+    logger.info('Client connected successfully', { token, room });
+    return room.id;
+  });
 
   setTimeout(() => {
     io.emit('hello', 'to all clients');
@@ -62,16 +60,15 @@ const initSocket = (server) => {
   // Will only run once per client-server connection
   io.use((socket, next) => {
     const { token } = socket.handshake.query;
-    const roomId = getRoomId(token);
-
-    logger.info('Authenticating client...', { token, roomId });
-
-    if (!roomId) {
-      logger.warn('Token provided by client was not valid', { token });
-      return next(new Error('Invalid joinToken'));
-    }
-
-    return next();
+    Promise.resolve(getRoom(token)).then((room) => {
+      logger.info('Authenticating client...', { token, room });
+      logger.info('RoomId', { room });
+      if (!room) {
+        logger.warn('Token provided by client was not valid', { token });
+        return next(new Error('Invalid joinToken'));
+      }
+      return next();
+    }, (error) => next(error));
   });
 
   io.on('connection', (socket) => handleSocketConnection(io, socket));
