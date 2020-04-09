@@ -5,23 +5,23 @@ const { initLogger } = require('../utils/logger');
 
 const logger = initLogger(module);
 
-const getRoom = (joinPin) => Promise.resolve(gameRoomService.findFromPin(joinPin));
+const getRoomId = (joinPin) => gameRoomService.findFromPin(joinPin)
+  .then((value) => value.id);
 
-const handleSocketConnection = (io, socket) => {
+const handleSocketConnection = async (io, socket) => {
   const { token } = socket.handshake.query;
   logger.info('Client connecting...', { token });
 
-  const roomId = Promise.resolve(getRoom(token)).then((room) => {
-    if (!room) {
-      logger.warn('Token provided by client was not valid', { token });
-      return new Error('Invalid joinToken');
-    }
+  const roomId = await getRoomId(token);
 
-    socket.join(`room-${room.id}`);
+  if (!roomId) {
+    logger.warn('Token provided by client was not valid', { token });
+    throw Error('Invalid joinToken');
+  }
 
-    logger.info('Client connected successfully', { token, room });
-    return room.id;
-  });
+  socket.join(`room-${roomId}`);
+
+  logger.info('Client connected successfully', { token, roomId });
 
   setTimeout(() => {
     io.emit('hello', 'to all clients');
@@ -44,11 +44,11 @@ const handleSocketConnection = (io, socket) => {
   // }, 3000);
 
   socket.on('disconnect', () => {
-    logger.info('Client disconnected');
+    logger.info('Client disconnected', { roomId });
   });
 
   socket.on('game message', (msg) => {
-    logger.info('Game message', { socketMessage: msg });
+    logger.info('Game message', { socketMessage: msg, roomId });
   });
 };
 
@@ -60,7 +60,7 @@ const initSocket = (server) => {
   // Will only run once per client-server connection
   io.use((socket, next) => {
     const { token } = socket.handshake.query;
-    Promise.resolve(getRoom(token)).then((room) => {
+    Promise.resolve(getRoomId(token)).then((room) => {
       logger.info('Authenticating client...', { token, room });
       logger.info('RoomId', { room });
       if (!room) {
