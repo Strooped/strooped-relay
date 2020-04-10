@@ -29,6 +29,14 @@ $('#connection').submit((evt) => {
     console.log(msg);
   });
 
+  socket.on('task:start', (msg) => {
+    console.log(msg);
+  });
+
+  socket.on('task:answer', (msg) => {
+    console.log(msg);
+  });
+
   socket.on('hello', (msg) => {
     console.log(`Hello ${msg}`);
   });
@@ -38,10 +46,11 @@ $('#connection').submit((evt) => {
 
     console.log('Form submitted');
     console.log(`Message ${$('#m').val()}`);
-    socket.emit('game message', $('#m').val());
+    socket.emit($('#type').val(), $('#m').val());
 
     // Clear value
     $('#m').val('');
+    $('#type').val('');
   });
 });
 

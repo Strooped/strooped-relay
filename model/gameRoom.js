@@ -9,6 +9,7 @@ class GameRoom extends Model {}
 GameRoom.init({
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
   joinPin: DataTypes.STRING,
+  gameMasterID: DataTypes.STRING,
 }, { sequelize, modelName: 'gameroom' });
 
 GameRoom.belongsToMany(Game, { through: 'GameRoomGame' });
