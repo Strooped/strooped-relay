@@ -5,14 +5,16 @@ const { initLogger } = require('../utils/logger');
 
 const logger = initLogger(module);
 
-const getRoomId = (joinPin) => gameRoomService.findFromPin(joinPin)
-  .then((value) => value.id);
+const getRoom = (joinPin) => gameRoomService.findFromPin(joinPin);
 
 const handleSocketConnection = async (io, socket) => {
   const { token } = socket.handshake.query;
   logger.info('Client connecting...', { token });
 
-  const roomId = await getRoomId(token);
+  const room = await getRoom(token);
+  const roomId = room.id;
+  const gameMasterSocketId = room.gameMasterID;
+
 
   if (!roomId) {
     logger.warn('Token provided by client was not valid', { token });
@@ -43,6 +45,21 @@ const handleSocketConnection = async (io, socket) => {
   //   count++;
   // }, 3000);
 
+  socket.on('task:start', (task) => {
+    logger.info('task:start', { socketMessage: task, roomId });
+    socket.to(`room-${roomId}`).emit('task:start', { task });
+  });
+
+  socket.on('task:answer', (answer) => {
+    logger.info('task:answer', { socketMessage: answer, roomId, gameMasterSocketId });
+    io.to(`${gameMasterSocketId}`).emit('task:answer', { answer, player: socket.id });
+  });
+
+  socket.on('game:start', (game) => {
+    logger.info('game:start', { socketMessage: game, roomId });
+    socket.to(`room-${roomId}`).emit('game:start', { game });
+  });
+
   socket.on('disconnect', () => {
     logger.info('Client disconnected', { roomId });
   });
@@ -60,12 +77,17 @@ const initSocket = (server) => {
   // Will only run once per client-server connection
   io.use((socket, next) => {
     const { token } = socket.handshake.query;
-    getRoomId(token).then((room) => {
+    getRoom(token).then((room) => {
       logger.info('Authenticating client...', { token, room });
       logger.info('RoomId', { room });
       if (!room) {
         logger.warn('Token provided by client was not valid', { token });
         return next(new Error('Invalid joinToken'));
+      }
+      if (!room.gameMasterID) {
+        room.update({
+          gameMasterID: socket.id
+        }).then(() => {});
       }
       return next();
     }, (error) => next(error));
