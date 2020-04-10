@@ -16,7 +16,7 @@ const handleSocketConnection = async (io, socket) => {
 
   if (!roomId) {
     logger.warn('Token provided by client was not valid', { token });
-    throw Error('Invalid joinToken');
+    throw new Error('Invalid joinToken');
   }
 
   socket.join(`room-${roomId}`);
@@ -60,7 +60,7 @@ const initSocket = (server) => {
   // Will only run once per client-server connection
   io.use((socket, next) => {
     const { token } = socket.handshake.query;
-    Promise.resolve(getRoomId(token)).then((room) => {
+    getRoomId(token).then((room) => {
       logger.info('Authenticating client...', { token, room });
       logger.info('RoomId', { room });
       if (!room) {
