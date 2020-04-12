@@ -33,6 +33,10 @@ $('#connection').submit((evt) => {
     console.log(msg);
   });
 
+  socket.on('round:ending', (msg) => {
+    console.log(msg);
+  });
+
   socket.on('task:start', (msg) => {
     console.log(msg);
   });
