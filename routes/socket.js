@@ -25,6 +25,8 @@ const handleSocketConnection = async (io, socket) => {
 
   logger.info('Client connected successfully', { token, roomId });
 
+  io.to(`${gameMasterSocketId}`).emit('player:joined', { player: socket.id });
+
   setTimeout(() => {
     io.emit('hello', 'to all clients');
     // Simulate that the game-master started a game in a game room using
@@ -50,6 +52,11 @@ const handleSocketConnection = async (io, socket) => {
     socket.to(`room-${roomId}`).emit('task:start', { task });
   });
 
+  socket.on('task:ending', (task) => {
+    logger.info('task:ending', { socketMessage: task, roomId });
+    socket.to(`room-${roomId}`).emit('task:ending', { task });
+  });
+
   socket.on('task:answer', (answer) => {
     logger.info('task:answer', { socketMessage: answer, roomId, gameMasterSocketId });
     io.to(`${gameMasterSocketId}`).emit('task:answer', { answer, player: socket.id });
@@ -58,6 +65,11 @@ const handleSocketConnection = async (io, socket) => {
   socket.on('game:start', (game) => {
     logger.info('game:start', { socketMessage: game, roomId });
     socket.to(`room-${roomId}`).emit('game:start', { game });
+  });
+
+  socket.on('game:ending', (game) => {
+    logger.info('game:ending', { socketMessage: game, roomId });
+    socket.to(`room-${roomId}`).emit('game:ending', { game });
   });
 
   socket.on('disconnect', () => {

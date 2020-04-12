@@ -29,11 +29,23 @@ $('#connection').submit((evt) => {
     console.log(msg);
   });
 
+  socket.on('game:ending', (msg) => {
+    console.log(msg);
+  });
+
   socket.on('task:start', (msg) => {
     console.log(msg);
   });
 
+  socket.on('task:ending', (msg) => {
+    console.log(msg);
+  });
+
   socket.on('task:answer', (msg) => {
+    console.log(msg);
+  });
+
+  socket.on('player:joined', (msg) => {
     console.log(msg);
   });
 
