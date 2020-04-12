@@ -62,6 +62,11 @@ const handleSocketConnection = async (io, socket) => {
     io.to(`${gameMasterSocketId}`).emit('task:answer', { answer, player: socket.id });
   });
 
+  socket.on('round:ending', (task) => {
+    logger.info('round:ending', { socketMessage: task, roomId });
+    socket.to(`room-${roomId}`).emit('round:ending', { task });
+  });
+
   socket.on('game:start', (game) => {
     logger.info('game:start', { socketMessage: game, roomId });
     socket.to(`room-${roomId}`).emit('game:start', { game });
