@@ -44,3 +44,32 @@ is done using `docker-compose down`.
 
 When programming it might be necessary to take down the containers and start from scratch. `docker-compose down &&
 docker-compose up -d && docker-compose logs -f` is a way to take the containers down, restart them and attach to the logs.
+
+## Development guide
+There is a debug page at / where it is possible to send socket-messages with any event and any message.
+
+### Events
+There are defined some events, these are either to be sent from gamemaster or the player.
+
+From gamemaster:
+- game:start
+- game:ending
+- round:ending
+- task:start
+- task:ending
+
+From the player:
+- task:answer
+
+In addition, there are the following automatic events:
+- player:joined
+- error
+- connect_error
+- connect
+- disconnect
+
+All events consist of two parts, the event name and the message that should be conveyed. The message
+should be in JSON, but that is not validated in the backend.
+
+There is no validation on the messages in the backend, except for the connections events, where
+there is validation of the token to join the room.
