@@ -25,7 +25,7 @@ const handleSocketConnection = async (io, socket) => {
 
   logger.info('Client connected successfully', { token, roomId });
 
-  io.to(`${gameMasterSocketId}`).emit('player:joined', { player: socket.id });
+  io.to(gameMasterSocketId).emit('player:joined', { player: { id: socket.id, username: 'placeholderusername' } });
 
   setTimeout(() => {
     io.emit('hello', 'to all clients');
@@ -59,7 +59,7 @@ const handleSocketConnection = async (io, socket) => {
 
   socket.on('task:answer', (answer) => {
     logger.info('task:answer', { socketMessage: answer, roomId, gameMasterSocketId });
-    io.to(`${gameMasterSocketId}`).emit('task:answer', { answer, player: socket.id });
+    io.to(gameMasterSocketId).emit('task:answer', { answer, player: socket.id });
   });
 
   socket.on('round:ending', (task) => {
