@@ -15,4 +15,11 @@ async function createGameRoomFromGame(req, res) {
   res.status(201).json(gameRoom);
 }
 
-module.exports = { gameRoomList, generateGameRooms, createGameRoomFromGame };
+async function getGameById(req, res) {
+  const gameRoom = await GameRoomService.findById(req.params.roomId);
+  res.status(200).json(gameRoom);
+}
+
+module.exports = {
+  gameRoomList, generateGameRooms, createGameRoomFromGame, getGameById
+};
