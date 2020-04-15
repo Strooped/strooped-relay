@@ -13,6 +13,11 @@ const gameRoomService = {
     where: {
       joinPin: pin
     }
+  }),
+  findById: async (id) => gameRoom.findOne({
+    where: {
+      id
+    }
   })
 };
 
