@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const Game = require('./game');
+const GameMode = require('./gameMode');
 const { getDbLazy } = require('../repository/database');
 
 const sequelize = getDbLazy();
@@ -12,7 +12,7 @@ GameRoom.init({
   gameMasterID: DataTypes.STRING,
 }, { sequelize, modelName: 'gameroom' });
 
-GameRoom.belongsToMany(Game, { through: 'GameRoomGame' });
-Game.belongsToMany(GameRoom, { through: 'GameRoomGame' });
+GameRoom.belongsTo(GameMode);
+GameMode.hasMany(GameRoom);
 
 module.exports = GameRoom;
