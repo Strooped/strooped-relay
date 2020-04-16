@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const Game = require('./game');
+const GameMode = require('./gameMode');
 const { getDbLazy } = require('../repository/database');
 
 const sequelize = getDbLazy();
@@ -11,7 +11,7 @@ Round.init({
 }, { sequelize, modelName: 'round' });
 
 // Define our many to many relations
-Round.belongsToMany(Game, { through: 'GameRound' });
-Game.belongsToMany(Round, { through: 'GameRound' });
+Round.belongsToMany(GameMode, { through: 'GameRound' });
+GameMode.belongsToMany(Round, { through: 'GameRound' });
 
 module.exports = Round;

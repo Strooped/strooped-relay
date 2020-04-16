@@ -88,14 +88,25 @@ const populateDatabase = async () => {
   const games = await Promise.all(
     [
       new Game({
-        title: 'Strooped Classic!',
-        description: 'The classic version of strooped'
+        title: 'Strooped!',
+        description: 'A game based on the psychological consept of the stroop effects'
       })
     ].map((game) => game.save())
   );
 
-  await games[0].setRounds(rounds.map((round) => round.id));
-  await games[0].save();
+  const gameModes = await Promise.all(
+    [
+      new GameMode({
+        title: 'Strooped classic',
+        description: 'Standard strooped where you select the name of the color of the font',
+        difficulty: 1
+      })
+    ].map((gameMode) => gameMode.save())
+  );
+
+  await gameModes[0].setRounds(rounds.map((round) => round.id));
+  await gameModes[0].setGame(games.map((game) => game.id));
+  await gameModes[0].save();
 
   const gameRooms = await Promise.all(
     [
@@ -105,8 +116,8 @@ const populateDatabase = async () => {
     ].map((room) => room.save())
   );
 
-  await gameRooms[0].setGames(games.map((game) => game.id))
-    .save();
+  await gameRooms[0].setGameMode(gameModes.map((gameMode) => gameMode.id));
+  await gameRooms[0].save();
 };
 
 module.exports = {
