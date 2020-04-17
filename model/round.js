@@ -11,7 +11,7 @@ Round.init({
 }, { sequelize, modelName: 'round' });
 
 // Define our many to many relations
-Round.belongsToMany(GameMode, { through: 'GameRound' });
-GameMode.belongsToMany(Round, { through: 'GameRound' });
+Round.belongsToMany(GameMode, { through: 'gameRound' });
+GameMode.belongsToMany(Round, { through: 'gameRound' });
 
 module.exports = Round;
