@@ -1,34 +1,32 @@
-const gameRoom = require('../model/gameRoom');
-const gameMode = require('../model/gameMode');
-const game = require('../model/game');
-const round = require('../model/round');
-const task = require('../model/task');
+const GameRoom = require('../model/gameRoom');
+const GameMode = require('../model/gameMode');
+const Game = require('../model/game');
+const Round = require('../model/round');
+const Task = require('../model/task');
 const pinGenerator = require('./pinGenerator');
 const gameModeService = require('./gameModeService');
 
 const gameRoomService = {
-  create: () => gameRoom.create({ joinPin: pinGenerator.generate() }),
-  findAll: () => gameRoom.findAll(),
-  createFromGame: async (gameModeId) => {
-    const GameMode = await gameModeService.findById(gameModeId);
-    return gameRoom.create({ joinPin: pinGenerator.generate(), gameModeId: GameMode.id });
-  },
-  findFromPin: async (pin) => gameRoom.findOne({
+  create: () => GameRoom.create({ joinPin: pinGenerator.generate() }),
+  findAll: () => GameRoom.findAll(),
+  createFromGame: async (gameModeId) => gameModeService.findById(gameModeId)
+    .then(() => GameRoom.create({ joinPin: pinGenerator.generate(), gameModeId })),
+  findFromPin: async (pin) => GameRoom.findOne({
     where: {
       joinPin: pin
     }
   }),
-  findById: async (id) => gameRoom.findByPk(id,
+  findById: async (id) => GameRoom.findByPk(id,
     {
       include: [
         {
-          model: gameMode,
+          model: GameMode,
           attributes: { exclude: ['gameId'] },
           include: [
-            { model: game },
+            { model: Game },
             {
-              model: round,
-              include: [{ model: task, through: { attributes: [] } }],
+              model: Round,
+              include: [{ model: Task, through: { attributes: [] } }],
               through: { attributes: [] }
             }
           ]

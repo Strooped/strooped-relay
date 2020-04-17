@@ -19,7 +19,7 @@ Task.init({
   correctAnswer: { type: DataTypes.STRING, allowNull: false },
 }, { sequelize, modelName: 'task' });
 
-Task.belongsToMany(Round, { through: 'TaskRound' });
-Round.belongsToMany(Task, { through: 'TaskRound' });
+Task.belongsToMany(Round, { through: 'taskRound' });
+Round.belongsToMany(Task, { through: 'taskRound' });
 
 module.exports = Task;

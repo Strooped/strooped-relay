@@ -1,9 +1,9 @@
-const gameMode = require('../model/gameMode');
+const GameMode = require('../model/gameMode');
 
 const gameModeService = {
-  findAll: () => gameMode.findAll(),
-  findById: (id) => gameMode.findByPk(id),
-  create: (request) => gameMode.create(request)
+  findAll: () => GameMode.findAll(),
+  findById: (id) => GameMode.findByPk(id),
+  create: (request) => GameMode.create(request)
 };
 
 module.exports = gameModeService;
