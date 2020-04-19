@@ -88,7 +88,7 @@ const handleSocketConnection = async (io, socket) => {
 
 const initSocket = (server) => {
   const io = new SocketServer(server);
-  io.adapter(redisAdapter({ host: 'redis', port: 6379 }));
+  io.adapter(redisAdapter({ host: process.env.REDIS_HOST, port: 6379 }));
 
   // Authenticate connection
   // Will only run once per client-server connection

@@ -1,0 +1,208 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ CI_PROJECT_NAME }}-redis
+  namespace: {{ KUBE_NAMESPACE }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ CI_PROJECT_NAME }}-redis
+  replicas: 1
+  revisionHistoryLimit: 2
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ CI_PROJECT_NAME }}-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:5.0.1
+        ports:
+          - containerPort: 6379
+            name: redisclient
+          - containerPort: 16379
+            name: redisgossip
+        resources:
+          requests:
+            memory: '200Mi'
+          limits:
+            memory: '600Mi'
+        livenessProbe:
+          exec:
+            command:
+              - redis-cli
+              - ping
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+              - redis-cli
+              - ping
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ CI_PROJECT_NAME }}-redis
+  namespace: {{ KUBE_NAMESPACE }}
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: redisclient
+    - port: 16379
+      targetPort: 16379
+      name: redisgossip
+  selector:
+    app: {{ CI_PROJECT_NAME }}-redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ CI_PROJECT_NAME }}-db
+  namespace: {{ KUBE_NAMESPACE }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ CI_PROJECT_NAME }}-db
+  replicas: 1
+  revisionHistoryLimit: 2
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ CI_PROJECT_NAME }}-db
+    spec:
+      containers:
+      - name: db
+        image: postgres:11
+        ports:
+          - name: postgresql
+            containerPort: 5432
+        resources:
+          requests:
+            memory: '300Mi'
+          limits:
+            memory: '600Mi'
+        env:
+          - name: POSTGRES_DB
+            value: strooped
+          - name: DB_USER
+            value: postgres
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: strooped-relay-secret
+                key: POSTGRES_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ CI_PROJECT_NAME }}-db
+  namespace: {{ KUBE_NAMESPACE }}
+  labels:
+    app: {{ CI_PROJECT_NAME }}-db
+spec:
+  ports:
+    - name: postgresql
+      port: 5432
+      protocol: TCP
+  selector:
+    app: "{{ CI_PROJECT_NAME }}-db"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ CI_PROJECT_NAME }}
+  namespace: {{ KUBE_NAMESPACE }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ CI_PROJECT_NAME }}
+  replicas: 2
+  revisionHistoryLimit: 2
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 10%
+  template:
+    metadata:
+      labels:
+        app: {{ CI_PROJECT_NAME }}
+    spec:
+      containers:
+        - image: strooped/{{ CI_PROJECT_NAME }}:{{ CI_COMMIT_SHORT_SHA }}
+          name: app
+          ports:
+            - containerPort: 3000
+              name: app
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DB_HOST
+              value: "{{ CI_PROJECT_NAME }}-db"
+            - name: POSTGRES_DB
+              value: strooped
+            - name: REDIS_HOST
+              value: "{{ CI_PROJECT_NAME }}-redis"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: strooped-relay-secret
+                  key: POSTGRES_PASSWORD
+          # Tells kubernetes whether or not the pod is ready to receive requests
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 3000
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+          # Tells it whether or not the application should be restarted or not. ex. from deadlock
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 3000
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ CI_PROJECT_NAME }}
+  namespace: {{ KUBE_NAMESPACE }}
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  selector:
+    app: {{ CI_PROJECT_NAME }}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ CI_PROJECT_NAME }}-ingress
+  namespace: {{ KUBE_NAMESPACE }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+    - hosts:
+        - strooped-api.lokalvert.tech
+      secretName: tls-relay-secret
+  rules:
+    - host: strooped-api.lokalvert.tech
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{ CI_PROJECT_NAME }}
+              servicePort: 3000
