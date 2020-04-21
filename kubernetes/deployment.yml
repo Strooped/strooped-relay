@@ -125,7 +125,7 @@ spec:
   selector:
     matchLabels:
       app: {{ CI_PROJECT_NAME }}
-  replicas: 1
+  replicas: 2
   revisionHistoryLimit: 2
   strategy:
     rollingUpdate:
@@ -176,6 +176,8 @@ kind: Service
 metadata:
   name: {{ CI_PROJECT_NAME }}
   namespace: {{ KUBE_NAMESPACE }}
+  annotations:
+    traefik.ingress.kubernetes.io/affinity: "true"
 spec:
   type: ClusterIP
   ports:
@@ -192,7 +194,6 @@ metadata:
   namespace: {{ KUBE_NAMESPACE }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   tls:
     - hosts:
