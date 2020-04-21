@@ -39,6 +39,16 @@ app.use('/', indexRouter);
 app.use('/v1/game-modes', gameModeRouter);
 app.use('/v1/game-rooms', gameRoomRouter);
 
+/**
+ * Liveness endpoint for kubernetes health checks
+ * */
+app.use('/actuator/health', (req, res, next) => {
+  // Just a simple query to ensure we can connect to the database
+  sequelize.query('SELECT 1')
+    .then(() => res.send('OK'))
+    .catch((err) => next(err));
+});
+
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

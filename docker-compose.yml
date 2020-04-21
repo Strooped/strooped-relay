@@ -19,7 +19,7 @@ services:
   app1:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     depends_on:
       - redis
       - db
@@ -27,6 +27,7 @@ services:
       NODE_ENV: development
       DB_HOST: db
       POSTGRES_DB: strooped
+      REDIS_HOST: redis
     env_file:
       - dev.env
     ports:
@@ -37,7 +38,7 @@ services:
   app2:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     depends_on:
       - redis
       - db
@@ -45,6 +46,7 @@ services:
       NODE_ENV: development
       DB_HOST: db
       POSTGRES_DB: strooped
+      REDIS_HOST: redis
     env_file:
       - dev.env
     ports:

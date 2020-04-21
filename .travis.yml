@@ -5,6 +5,18 @@ env:
   global:
   - KUBECONFIG="/etc/deploy/config"
   - CONTAINER_NAME="lokalvert.tech/${TRAVIS_REPO_SLUG}:${TRAVIS_COMMIT}"
+  - CI_DOCKER_IMAGE="strooped/strooped-relay:${TRAVIS_COMMIT}"
+  - KUBE_NAMESPACE="strooped"
+  - CI_PROJECT_NAME="strooped-relay"
+  - CI_KUBE_FILE="strooped-relay.yml"
+
+before_install:
+  - openssl aes-256-cbc -K $encrypted_be9d29cb2b88_key -iv $encrypted_be9d29cb2b88_iv -in deploy_key.enc -out ./deploy_key -d
+  - eval "$(ssh-agent -s)"
+  - chmod 600 deploy_key
+  - ssh-add deploy_key
+  - ssh-keyscan lokalvert.tech >> ~/.ssh/known_hosts
+
 jobs:
   include:
   - stage: Quality
@@ -13,8 +25,24 @@ jobs:
   - stage: Test
     name: Unit-test
     script: npm run test:coverage
-#  - stage: Dependency Audit
-#    script: npm audit || true
-before_install:
-- openssl aes-256-cbc -K $encrypted_be9d29cb2b88_key -iv $encrypted_be9d29cb2b88_iv
-  -in deploy_key.enc -out ./deploy_key -d
+  - stage: build docker image
+    language: bash
+    os: linux
+    arch: arm64
+    script:
+      - echo "$DOCKER_SECRET" | docker login -u "$DOCKER_USER" --password-stdin
+      - docker build -t $CI_DOCKER_IMAGE .
+      - docker images
+      - docker push $CI_DOCKER_IMAGE
+    if: branch = master
+  - stage: Deploy production
+    language: bash
+    script:
+      - sed -e "s/{{ CI_COMMIT_SHORT_SHA }}/${TRAVIS_COMMIT}/g" -e "s/{{ CI_PROJECT_NAME }}/${CI_PROJECT_NAME}/g" -e "s/{{ KUBE_NAMESPACE }}/${KUBE_NAMESPACE}/g" kubernetes/deployment.yml > bundle/$CI_KUBE_FILE
+      - rsync -r --quiet $TRAVIS_BUILD_DIR/bundle/$CI_KUBE_FILE strooped-ci@lokalvert.tech:~/$CI_KUBE_FILE
+      - ssh strooped-ci@lokalvert.tech "KUBECONFIG=/home/strooped-ci/.kube/config kubectl apply -f ~/$CI_KUBE_FILE"
+      - ssh strooped-ci@lokalvert.tech KUBECONFIG=/home/strooped-ci/.kube/config kubectl rollout status -w "deployment/${CI_PROJECT_NAME}" --namespace=${KUBE_NAMESPACE}
+    if: branch = master
+    cache:
+      directories:
+        - bundle/
