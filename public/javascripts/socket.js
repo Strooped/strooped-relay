@@ -3,9 +3,10 @@ $('#connection').submit((evt) => {
   evt.preventDefault();
 
   const token = $('#coninput').val();
+  const username = $('#username').val();
 
   const socket = io({
-    query: { token }
+    query: { token, username }
   });
 
   socket.on('connect', () => {

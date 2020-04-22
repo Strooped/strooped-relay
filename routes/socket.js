@@ -1,6 +1,7 @@
 const SocketServer = require('socket.io');
 const redisAdapter = require('socket.io-redis');
 const gameRoomService = require('../service/gameRoomService');
+const playerService = require('../service/playerService');
 const { initLogger } = require('../utils/logger');
 
 const logger = initLogger(module);
@@ -8,7 +9,7 @@ const logger = initLogger(module);
 const getRoom = (joinPin) => gameRoomService.findFromPin(joinPin);
 
 const handleSocketConnection = async (io, socket) => {
-  const { token } = socket.handshake.query;
+  const { token, username } = socket.handshake.query;
   logger.info('Client connecting...', { token });
 
   const room = await getRoom(token);
@@ -25,7 +26,14 @@ const handleSocketConnection = async (io, socket) => {
 
   logger.info('Client connected successfully', { token, roomId });
 
-  io.to(gameMasterSocketId).emit('player:joined', { player: { id: socket.id, username: 'placeholderusername' } });
+  let player = await playerService.findFromUsername(username, roomId);
+  logger.info('Player from DB', { player });
+  if (player === null) {
+    player = await playerService.create(socket.id, username, roomId);
+    logger.info('New player created', { player, token });
+  }
+
+  io.to(gameMasterSocketId).emit('player:joined', { player });
 
   setTimeout(() => {
     io.emit('hello', 'to all clients');
