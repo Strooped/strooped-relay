@@ -1,5 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const GameMode = require('./gameMode');
+const Player = require('./player');
 const { getDbLazy } = require('../repository/database');
 
 const sequelize = getDbLazy();
@@ -14,5 +15,7 @@ GameRoom.init({
 
 GameRoom.belongsTo(GameMode);
 GameMode.hasMany(GameRoom);
+Player.belongsTo(GameRoom);
+GameRoom.hasMany(Player);
 
 module.exports = GameRoom;

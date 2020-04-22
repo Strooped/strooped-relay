@@ -11,6 +11,8 @@ const GameMode = require('../model/gameMode');
 const Round = require('../model/round');
 // eslint-disable-next-line no-unused-vars
 const Task = require('../model/task');
+// eslint-disable-next-line no-unused-vars
+const Player = require('../model/player');
 
 const TaskType = require('../model/enum/taskTypes');
 const { getRandomSelection } = require('../utils/color');
@@ -40,6 +42,7 @@ const truncateTables = async () => {
   await Game.destroy({ where: {} });
   await Round.destroy({ where: {} });
   await Task.destroy({ where: {} });
+  await Player.destroy({ where: {} });
 };
 
 
