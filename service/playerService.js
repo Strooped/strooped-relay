@@ -8,6 +8,12 @@ const playerService = {
       gameRoomId
     }
   }),
+  incrementScoreIfAnswerCorrect: async (answer, task, player) => {
+    if (task.correctAnswer === answer) {
+      player.increment('score').then(player.reload());
+    }
+    return player;
+  }
 };
 
 module.exports = playerService;

@@ -2,7 +2,6 @@ const SocketServer = require('socket.io');
 const redisAdapter = require('socket.io-redis');
 const gameRoomService = require('../service/gameRoomService');
 const playerService = require('../service/playerService');
-const taskService = require('../service/taskService');
 const { initLogger } = require('../utils/logger');
 
 const logger = initLogger(module);
@@ -71,8 +70,9 @@ const handleSocketConnection = async (io, socket) => {
 
   socket.on('task:answer', (answer) => {
     logger.info('task:answer', { socketMessage: answer, roomId, gameMasterSocketId });
-    io.to(gameMasterSocketId).emit('task:answer', { answer, player: socket.id });
-    taskService.checkAnswer(answer, room, player);
+    const task = room.getCurrentTask();
+    player = playerService.incrementScoreIfAnswerCorrect(answer, task, player);
+    io.to(gameMasterSocketId).emit('task:answer', { answer, player });
   });
 
   socket.on('round:ending', (task) => {
