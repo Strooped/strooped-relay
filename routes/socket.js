@@ -63,9 +63,9 @@ const handleSocketConnection = async (io, socket) => {
     });
   });
 
-  socket.on('task:ending', (task) => {
-    logger.info('task:ending', { socketMessage: task, roomId });
-    socket.to(`room-${roomId}`).emit('task:ending', { task });
+  socket.on('task:ending', () => {
+    logger.info('task:ending', { roomId });
+    socket.to(`room-${roomId}`).emit('task:ending');
   });
 
   socket.on('task:answer', (answer) => {
@@ -75,11 +75,11 @@ const handleSocketConnection = async (io, socket) => {
     io.to(gameMasterSocketId).emit('task:answer', { answer, player });
   });
 
-  socket.on('round:ending', (task) => {
-    logger.info('round:ending', { socketMessage: task, roomId });
+  socket.on('round:ending', () => {
+    logger.info('round:ending', { roomId });
     room.getPlayers().then((players) => {
       players.forEach((playerObj) => {
-        io.to(playerObj.socket).emit('round:ending', { task, score: playerObj.score });
+        io.to(playerObj.socket).emit('round:ending', { player: playerObj });
       });
     });
   });

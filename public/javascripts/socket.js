@@ -42,8 +42,8 @@ $('#connection').submit((evt) => {
     console.log(msg);
   });
 
-  socket.on('task:ending', (msg) => {
-    console.log(msg);
+  socket.on('task:ending', () => {
+    console.log('task:ending');
   });
 
   socket.on('task:answer', (msg) => {
