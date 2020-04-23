@@ -68,11 +68,11 @@ const handleSocketConnection = async (io, socket) => {
     socket.to(`room-${roomId}`).emit('task:ending');
   });
 
-  socket.on('task:answer', (answer) => {
-    logger.info('task:answer', { socketMessage: answer, roomId, gameMasterSocketId });
+  socket.on('task:answer', (payload) => {
+    logger.info('task:answer', { socketMessage: payload, roomId, gameMasterSocketId });
     const task = room.getCurrentTask();
-    player = playerService.incrementScoreIfAnswerCorrect(answer, task, player);
-    io.to(gameMasterSocketId).emit('task:answer', { answer, player });
+    player = playerService.incrementScoreIfAnswerCorrect(payload.answer, task, player);
+    io.to(gameMasterSocketId).emit('task:answer', { payload, player });
   });
 
   socket.on('round:ending', () => {

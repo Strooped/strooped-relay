@@ -68,8 +68,14 @@ In addition, there are the following automatic events:
 - connect
 - disconnect
 
-All events consist of two parts, the event name and the message that should be conveyed. The message
-should be in JSON, but that is not validated in the backend.
+All events consist of two parts, the event name, and the message that should be conveyed. The message
+should be in JSON.
 
-There is no validation on the messages in the backend, except for the connections events, where
-there is validation of the token to join the room.
+Answers need to be objects on the following format:
+```
+{
+    "answer": "<hex-value of color>",
+    "taskId": <integer value of the task id>,
+    "timestamp": <unixepoch in UTC>
+}
+```
