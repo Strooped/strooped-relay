@@ -34,8 +34,8 @@ const gameRoomService = {
         },
         { model: Player }
       ],
-      attributes: { exclude: ['gameModeId'] }
-    })
+      attributes: { exclude: ['gameModeId', 'CurrentTaskId'] }
+    }),
 };
 
 module.exports = gameRoomService;
