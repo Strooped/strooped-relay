@@ -32,7 +32,10 @@ const gameRoomService = {
             }
           ]
         },
-        { model: Player }
+        {
+          model: Player,
+          attributes: { exclude: ['gameRoomId'] }
+        }
       ],
       attributes: { exclude: ['gameModeId', 'CurrentTaskId'] }
     }),

@@ -77,7 +77,11 @@ const handleSocketConnection = async (io, socket) => {
 
   socket.on('round:ending', (task) => {
     logger.info('round:ending', { socketMessage: task, roomId });
-    socket.to(`room-${roomId}`).emit('round:ending', { task });
+    room.getPlayers().then((players) => {
+      players.forEach((playerObj) => {
+        io.to(playerObj.socket).emit('round:ending', { task, score: playerObj.score });
+      });
+    });
   });
 
   socket.on('game:start', (game) => {
