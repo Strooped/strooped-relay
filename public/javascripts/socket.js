@@ -3,9 +3,10 @@ $('#connection').submit((evt) => {
   evt.preventDefault();
 
   const token = $('#coninput').val();
+  const username = $('#username').val();
 
   const socket = io({
-    query: { token }
+    query: { token, username }
   });
 
   socket.on('connect', () => {
@@ -41,8 +42,8 @@ $('#connection').submit((evt) => {
     console.log(msg);
   });
 
-  socket.on('task:ending', (msg) => {
-    console.log(msg);
+  socket.on('task:ending', () => {
+    console.log('task:ending');
   });
 
   socket.on('task:answer', (msg) => {

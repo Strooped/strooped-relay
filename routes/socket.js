@@ -1,6 +1,7 @@
 const SocketServer = require('socket.io');
 const redisAdapter = require('socket.io-redis');
 const gameRoomService = require('../service/gameRoomService');
+const playerService = require('../service/playerService');
 const { initLogger } = require('../utils/logger');
 
 const logger = initLogger(module);
@@ -8,7 +9,7 @@ const logger = initLogger(module);
 const getRoom = (joinPin) => gameRoomService.findFromPin(joinPin);
 
 const handleSocketConnection = async (io, socket) => {
-  const { token } = socket.handshake.query;
+  const { token, username } = socket.handshake.query;
   logger.info('Client connecting...', { token });
 
   const room = await getRoom(token);
@@ -25,7 +26,14 @@ const handleSocketConnection = async (io, socket) => {
 
   logger.info('Client connected successfully', { token, roomId });
 
-  io.to(gameMasterSocketId).emit('player:joined', { player: { id: socket.id, username: 'placeholderusername' } });
+  let player = await playerService.findFromUsername(username, roomId);
+  logger.info('Player from DB', { player });
+  if (player === null) {
+    player = await playerService.create(socket.id, username, roomId);
+    logger.info('New player created', { player, token });
+  }
+
+  io.to(gameMasterSocketId).emit('player:joined', { player });
 
   setTimeout(() => {
     io.emit('hello', 'to all clients');
@@ -50,21 +58,30 @@ const handleSocketConnection = async (io, socket) => {
   socket.on('task:start', (task) => {
     logger.info('task:start', { socketMessage: task, roomId });
     socket.to(`room-${roomId}`).emit('task:start', { task });
+    room.update({
+      currentTaskId: task.id
+    });
   });
 
-  socket.on('task:ending', (task) => {
-    logger.info('task:ending', { socketMessage: task, roomId });
-    socket.to(`room-${roomId}`).emit('task:ending', { task });
+  socket.on('task:ending', () => {
+    logger.info('task:ending', { roomId });
+    socket.to(`room-${roomId}`).emit('task:ending');
   });
 
-  socket.on('task:answer', (answer) => {
-    logger.info('task:answer', { socketMessage: answer, roomId, gameMasterSocketId });
-    io.to(gameMasterSocketId).emit('task:answer', { answer, player: socket.id });
+  socket.on('task:answer', (payload) => {
+    logger.info('task:answer', { socketMessage: payload, roomId, gameMasterSocketId });
+    const task = room.getCurrentTask();
+    player = playerService.incrementScoreIfAnswerCorrect(payload.answer, task, player);
+    io.to(gameMasterSocketId).emit('task:answer', { payload, player });
   });
 
-  socket.on('round:ending', (task) => {
-    logger.info('round:ending', { socketMessage: task, roomId });
-    socket.to(`room-${roomId}`).emit('round:ending', { task });
+  socket.on('round:ending', () => {
+    logger.info('round:ending', { roomId });
+    room.getPlayers().then((players) => {
+      players.forEach((playerObj) => {
+        io.to(playerObj.socket).emit('round:ending', { player: playerObj });
+      });
+    });
   });
 
   socket.on('game:start', (game) => {

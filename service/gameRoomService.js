@@ -3,6 +3,7 @@ const GameMode = require('../model/gameMode');
 const Game = require('../model/game');
 const Round = require('../model/round');
 const Task = require('../model/task');
+const Player = require('../model/player');
 const pinGenerator = require('./pinGenerator');
 const gameModeService = require('./gameModeService');
 
@@ -30,10 +31,14 @@ const gameRoomService = {
               through: { attributes: [] }
             }
           ]
+        },
+        {
+          model: Player,
+          attributes: { exclude: ['gameRoomId'] }
         }
       ],
-      attributes: { exclude: ['gameModeId'] }
-    })
+      attributes: { exclude: ['gameModeId', 'currentTaskId'] }
+    }),
 };
 
 module.exports = gameRoomService;

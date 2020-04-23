@@ -5,7 +5,8 @@ block content
   p Welcome to #{title}
 
   form#connection
-    input#coninput(type='text', required='required')
+    input#coninput(type='text', required='required', placeholder='token')
+    input#username(type='text', required='required', placeholder='username')
     p#error
     button(type='submit') Connect
 
