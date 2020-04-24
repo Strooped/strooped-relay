@@ -1,5 +1,5 @@
-const gameRoomService = require('../service/gameRoomService');
-const playerService = require('../service/playerService');
+const gameRoomService = require('./gameRoomService');
+const playerService = require('./playerService');
 const { initLogger } = require('../utils/logger');
 
 const logger = initLogger(module);
@@ -48,11 +48,7 @@ const gameMasterConnection = async (io, socket) => {
   });
 
   socket.on('disconnect', () => {
-    logger.info('Client disconnected', { roomId });
-  });
-
-  socket.on('game message', (msg) => {
-    logger.info('Game message', { socketMessage: msg, roomId });
+    logger.info('Game Master disconnected', { roomId });
   });
 };
 
@@ -97,10 +93,6 @@ const clientConnection = async (io, socket) => {
 
   socket.on('disconnect', () => {
     logger.info('Client disconnected', { roomId });
-  });
-
-  socket.on('game message', (msg) => {
-    logger.info('Game message', { socketMessage: msg, roomId });
   });
 };
 
