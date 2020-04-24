@@ -16,30 +16,25 @@ const initSocket = (server) => {
   // Will only run once per client-server connection
   io.use((socket, next) => {
     const { token, role } = socket.handshake.query;
-    if (typeof role !== 'undefined' && role === 'master') {
-      getRoom(token).then((room) => {
-        logger.info('Authenticating Game Master...', { token, room });
-        logger.info('RoomId', { room });
-        if (!room) {
-          logger.warn('Token provided by Game Master was not valid', { token });
-          return next(new Error('Invalid joinToken'));
-        }
-        room.update({
-          gameMasterID: socket.id
-        });
-        return next();
-      }, (error) => next(error));
-    } else {
-      getRoom(token).then((room) => {
-        logger.info('Authenticating client...', { token, room });
-        logger.info('RoomId', { room });
+    logger.info('Authenticating Client...', { token, role });
+    getRoom(token)
+      .then((room) => {
         if (!room) {
           logger.warn('Token provided by client was not valid', { token });
-          return next(new Error('Invalid joinToken'));
+          return Promise.reject(new Error('Invalid joinToken'));
+        }
+
+        return Promise.resolve(room);
+      })
+      .then((room) => {
+        if (role === 'master') {
+          room.update({
+            gameMasterID: socket.id
+          });
         }
         return next();
-      }, (error) => next(error));
-    }
+      })
+      .catch((error) => next(error));
   });
 
   io.on('connection', (socket) => socketController.handleSocketConnection(io, socket));
