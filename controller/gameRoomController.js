@@ -20,6 +20,16 @@ async function getGameById(req, res) {
   res.status(200).json(gameRoom);
 }
 
+async function updateGameMode(req, res) {
+  gameRoomService.findById(req.params.roomId).then((gameRoom) => {
+    gameRoom.update({ gameModeId: req.body.mode }).then((value) => {
+      value.reload().then((updatedRoom) => {
+        res.status(200).json(updatedRoom);
+      });
+    });
+  });
+}
+
 module.exports = {
-  gameRoomList, generateGameRooms, createGameRoomFromGame, getGameById
+  gameRoomList, generateGameRooms, createGameRoomFromGame, getGameById, updateGameMode
 };
