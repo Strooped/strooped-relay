@@ -88,9 +88,9 @@ const clientConnection = async (io, socket) => {
 
   io.to(gameMasterSocketId).emit('player:joined', { player });
 
-  socket.on('task:answer', (payload) => {
-    logger.info('task:answer', { socketMessage: payload, roomId, gameMasterSocketId });
-    const task = room.getCurrentTask();
+  socket.on('task:answer', async (payload) => {
+    const task = await room.getCurrentTask();
+    logger.info('task:answer', { socketMessage: payload, gameMasterSocketId, task, room });
     player = playerService.incrementScoreIfAnswerCorrect(payload.answer, task, player);
     io.to(gameMasterSocketId).emit('task:answer', { payload, player });
   });
