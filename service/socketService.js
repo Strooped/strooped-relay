@@ -53,7 +53,7 @@ const gameMasterConnection = async (io, socket) => {
     room.getPlayers().then((players) => {
       players.sort((prev, next) => prev.score - next.score)
         .forEach((playerObj, index) => {
-          io.to(playerObj.socket).emit('round:ending', { player: playerObj, placement: index + 1 });
+          io.to(playerObj.socket).emit('game:ending', { player: playerObj, placement: index + 1 });
         });
     });
   });
