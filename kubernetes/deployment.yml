@@ -125,7 +125,7 @@ spec:
   selector:
     matchLabels:
       app: {{ CI_PROJECT_NAME }}
-  replicas: 2
+  replicas: 1
   revisionHistoryLimit: 2
   strategy:
     rollingUpdate:
