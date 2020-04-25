@@ -44,7 +44,11 @@ const gameMasterConnection = async (io, socket) => {
 
   socket.on('game:ending', (game) => {
     logger.info('game:ending', { socketMessage: game, roomId });
-    socket.to(`room-${roomId}`).emit('game:ending', { game });
+    room.getPlayers().then((players) => {
+      players.forEach((playerObj) => {
+        io.to(playerObj.socket).emit('game:ending', { player: playerObj });
+      });
+    });
   });
 
   socket.on('disconnect', () => {

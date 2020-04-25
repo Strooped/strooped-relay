@@ -4,10 +4,22 @@ $('#connection').submit((evt) => {
 
   const token = $('#coninput').val();
   const username = $('#username').val();
+  const role = $('#role').val();
 
-  const socket = io({
-    query: { token, username }
-  });
+  let socket;
+
+  if (typeof username !== "undefined") {
+    socket = io({
+      query: {token, username}
+    });
+  } else if (typeof role !== "undefined") {
+    socket = io({
+      query: {token, role}
+    });
+  }
+  if (typeof socket === "undefined") {
+    throw new HttpError;
+  }
 
   socket.on('connect', () => {
     console.log('connected')
