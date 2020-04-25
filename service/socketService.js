@@ -36,9 +36,10 @@ const gameMasterConnection = async (io, socket) => {
   socket.on('round:ending', () => {
     logger.info('round:ending', { roomId });
     room.getPlayers().then((players) => {
-      players.forEach((playerObj) => {
-        io.to(playerObj.socket).emit('round:ending', { player: playerObj });
-      });
+      players.sort((prev, next) => prev.score - next.score)
+        .forEach((playerObj, index) => {
+          io.to(playerObj.socket).emit('round:ending', { placement: index + 1 });
+        });
     });
   });
 
@@ -50,9 +51,10 @@ const gameMasterConnection = async (io, socket) => {
   socket.on('game:ending', (game) => {
     logger.info('game:ending', { socketMessage: game, roomId });
     room.getPlayers().then((players) => {
-      players.forEach((playerObj) => {
-        io.to(playerObj.socket).emit('game:ending', { player: playerObj });
-      });
+      players.sort((prev, next) => prev.score - next.score)
+        .forEach((playerObj, index) => {
+          io.to(playerObj.socket).emit('game:ending', { placement: index + 1 });
+        });
     });
   });
 
