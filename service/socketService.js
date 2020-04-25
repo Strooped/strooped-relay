@@ -42,9 +42,18 @@ const gameMasterConnection = async (io, socket) => {
     });
   });
 
+  socket.on('game:start', (game) => {
+    logger.info('game:start', { socketMessage: game, roomId });
+    socket.to(`room-${roomId}`).emit('game:start', { game });
+  });
+
   socket.on('game:ending', (game) => {
     logger.info('game:ending', { socketMessage: game, roomId });
-    socket.to(`room-${roomId}`).emit('game:ending', { game });
+    room.getPlayers().then((players) => {
+      players.forEach((playerObj) => {
+        io.to(playerObj.socket).emit('game:ending', { player: playerObj });
+      });
+    });
   });
 
   socket.on('disconnect', () => {
@@ -79,16 +88,11 @@ const clientConnection = async (io, socket) => {
 
   io.to(gameMasterSocketId).emit('player:joined', { player });
 
-  socket.on('task:answer', (payload) => {
-    logger.info('task:answer', { socketMessage: payload, roomId, gameMasterSocketId });
-    const task = room.getCurrentTask();
+  socket.on('task:answer', async (payload) => {
+    const task = await room.getCurrentTask();
+    logger.info('task:answer', { socketMessage: payload, gameMasterSocketId, task, room });
     player = playerService.incrementScoreIfAnswerCorrect(payload.answer, task, player);
     io.to(gameMasterSocketId).emit('task:answer', { payload, player });
-  });
-
-  socket.on('game:start', (game) => {
-    logger.info('game:start', { socketMessage: game, roomId });
-    socket.to(`room-${roomId}`).emit('game:start', { game });
   });
 
   socket.on('disconnect', () => {
