@@ -51,7 +51,7 @@ const gameMasterConnection = async (io, socket) => {
   socket.on('game:ending', (game) => {
     logger.info('game:ending', { socketMessage: game, roomId });
     room.getPlayers().then((players) => {
-      players.sort((prev, next) => prev.score - next.score)
+      players.sort((prev, next) => next.score - prev.score)
         .forEach((playerObj, index) => {
           io.to(playerObj.socket).emit('game:ending', { placement: index + 1 });
         });
