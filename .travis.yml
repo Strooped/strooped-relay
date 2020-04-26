@@ -34,7 +34,7 @@ jobs:
       - docker build -t $CI_DOCKER_IMAGE .
       - docker images
       - docker push $CI_DOCKER_IMAGE
-    if: branch = master
+    if: branch = master AND type = push AND fork = false
   - stage: Deploy production
     language: bash
     script:
@@ -42,7 +42,7 @@ jobs:
       - rsync -r --quiet $TRAVIS_BUILD_DIR/bundle/$CI_KUBE_FILE strooped-ci@lokalvert.tech:~/$CI_KUBE_FILE
       - ssh strooped-ci@lokalvert.tech "KUBECONFIG=/home/strooped-ci/.kube/config kubectl apply -f ~/$CI_KUBE_FILE"
       - ssh strooped-ci@lokalvert.tech KUBECONFIG=/home/strooped-ci/.kube/config kubectl rollout status -w "deployment/${CI_PROJECT_NAME}" --namespace=${KUBE_NAMESPACE}
-    if: branch = master
+    if: branch = master AND type = push AND fork = false
     cache:
       directories:
         - bundle/
