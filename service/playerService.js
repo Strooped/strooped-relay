@@ -8,11 +8,10 @@ const playerService = {
       gameRoomId
     }
   }),
-  incrementScoreIfAnswerCorrect: async (answer, task, player) => {
+  incrementScoreIfAnswerCorrect: async (answer, task, playerId) => {
     if (task.correctAnswer === answer) {
-      player.increment('score').then(player.reload());
+      Player.increment('score', { where: { id: playerId } });
     }
-    return player;
   }
 };
 
