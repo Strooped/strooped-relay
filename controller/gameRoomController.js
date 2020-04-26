@@ -1,6 +1,6 @@
 const gameRoomService = require('../service/gameRoomService');
 
-async function gameRoomList(req, res) {
+async function listGameRoom(req, res) {
   const gameRoom = await gameRoomService.findAll();
   res.json(gameRoom);
 }
@@ -32,5 +32,5 @@ async function updateGameMode(req, res, next) {
 }
 
 module.exports = {
-  gameRoomList, generateGameRooms, createGameRoomFromGame, getGameById, updateGameMode
+  listGameRoom, generateGameRooms, createGameRoomFromGame, getGameById, updateGameMode
 };
