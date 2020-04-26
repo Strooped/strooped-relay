@@ -58,7 +58,7 @@ const populateDatabase = async () => {
     return;
   }
 
-  const tasks = new Array(40)
+  const tasks = new Array(15)
     .fill(null)
     .map(() => buildColorTask());
 
