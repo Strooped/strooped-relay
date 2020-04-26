@@ -20,14 +20,15 @@ async function getGameById(req, res) {
   res.status(200).json(gameRoom);
 }
 
-async function updateGameMode(req, res) {
+async function updateGameMode(req, res, next) {
   gameRoomService.findById(req.params.roomId).then((gameRoom) => {
     gameRoom.update({ gameModeId: req.body.mode }).then((value) => {
       value.reload().then((updatedRoom) => {
         res.status(200).json(updatedRoom);
       });
     });
-  });
+  })
+    .catch(next);
 }
 
 module.exports = {
