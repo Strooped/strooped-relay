@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Orange",
+    "color": "#FFA500",
+    "family": "Orange"
+  },
+  {
+    "name": "Chartreuse",
+    "color": "#7FFF00",
+    "family": "green"
+  },
+  {
+    "name": "Spring Green",
+    "color": "#00FF7F",
+    "family": "green"
+  },
+  {
+    "name": "Azure",
+    "color": "#F0FFFF",
+    "family": "white"
+  },
+  {
+    "name": "Violet",
+    "color": "#EE82EE",
+    "family": "purple"
+  },
+  {
+    "name": "Pink",
+    "color": "#FFC0CB",
+    "family": "pink"
+  }
+]

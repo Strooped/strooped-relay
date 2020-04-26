@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Red",
+    "color": "#FF0000",
+    "family": "red"
+  },
+  {
+    "name": "Yellow",
+    "color": "#FFFF00",
+    "family": "yellow"
+  },
+  {
+    "name": "Green",
+    "color": "#00FF00",
+    "family": "green"
+  },
+  {
+    "name": "Cyan",
+    "color": "#00FFFF",
+    "family": "blue"
+  },
+  {
+    "name": "Blue",
+    "color": "#0000FF",
+    "family": "blue"
+  },
+  {
+    "name": "Magenta",
+    "color": "#FF00FF",
+    "family": "purple"
+  }
+]
