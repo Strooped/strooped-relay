@@ -37,7 +37,7 @@ const gameRoomService = {
           attributes: { exclude: ['gameRoomId'] }
         }
       ],
-      attributes: { exclude: ['gameModeId', 'currentTaskId'] }
+      attributes: { exclude: ['gameModeId'] }
     }),
 };
 

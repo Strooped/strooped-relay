@@ -22,10 +22,10 @@ const gameMasterConnection = async (io, socket) => {
 
   socket.on('task:start', (task) => {
     logger.info('task:start', { socketMessage: task, roomId });
-    socket.to(`room-${roomId}`).emit('task:start', { task });
     room.update({
       currentTaskId: task.id
     });
+    socket.to(`room-${roomId}`).emit('task:start', { task });
   });
 
   socket.on('task:ending', () => {
@@ -91,12 +91,14 @@ const clientConnection = async (io, socket) => {
   io.to(gameMasterSocketId).emit('player:joined', { player });
 
   socket.on('task:answer', async (payload) => {
+    await room.reload();
     const task = await room.getCurrentTask();
     logger.info('task:answer', {
       socketMessage: payload, gameMasterSocketId, task, room
     });
 
-    player = playerService.incrementScoreIfAnswerCorrect(payload.answer, task, player);
+    await playerService.incrementScoreIfAnswerCorrect(payload.answer, task, player.id);
+    player.reload();
     io.to(gameMasterSocketId).emit('task:answer', { payload, player });
   });
 
