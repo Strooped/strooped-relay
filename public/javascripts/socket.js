@@ -8,7 +8,7 @@ $('#connection').submit((evt) => {
 
   let socket;
 
-  if (typeof username !== "undefined") {
+  if (typeof username !== "undefined" && username !== "") {
     socket = io({
       query: {token, username}
     });

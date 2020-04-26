@@ -36,7 +36,7 @@ const gameMasterConnection = async (io, socket) => {
   socket.on('round:ending', () => {
     logger.info('round:ending', { roomId });
     room.getPlayers().then((players) => {
-      players.sort((prev, next) => prev.score - next.score)
+      players.sort((prev, next) => next.score - prev.score)
         .forEach((playerObj, index) => {
           io.to(playerObj.socket).emit('round:ending', { placement: index + 1 });
         });
@@ -86,6 +86,10 @@ const clientConnection = async (io, socket) => {
   if (player === null) {
     player = await playerService.create(socket.id, username, roomId);
     logger.info('New player created', { player, token });
+  } else if (player.socket !== socket.id) {
+    player.update({
+      socket: socket.id
+    });
   }
 
   io.to(gameMasterSocketId).emit('player:joined', { player });
