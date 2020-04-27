@@ -1,6 +1,10 @@
 const { initLogger } = require('../utils/logger');
 const { shuffle } = require('../utils/arrayUtil');
 
+const allColors = require('../public/colors.json');
+const basicColors = require('../public/basiccolors.json');
+const tertiaryColors = require('../public/tertiarycolors.json');
+
 const Game = require('../model/game');
 const GameRoom = require('../model/gameRoom');
 const GameMode = require('../model/gameMode');
@@ -8,8 +12,7 @@ const Round = require('../model/round');
 const Task = require('../model/task');
 const Player = require('../model/player');
 
-const TaskType = require('../model/enum/taskTypes');
-const { getRandomSelection } = require('../utils/color');
+const { buildColorTask } = require('../utils/color');
 
 const logger = initLogger(module);
 
@@ -39,48 +42,58 @@ const truncateTables = async () => {
   await Player.destroy({ where: {} });
 };
 
+const generateTasksFromColorList = async (colorList) => {
+  const tasks = new Array(15)
+    .fill(null)
+    .map(() => buildColorTask(colorList));
 
-const buildColorTask = () => {
-  const buttons = getRandomSelection(4)
-    .map(({ color }) => color);
+  return Promise.all(tasks.map((task) => task.save())).then((value) => value);
+};
 
-  return new Task({
-    buttons,
-    type: TaskType.COLOR,
-    correctAnswer: shuffle(buttons)[0]
-  });
+const generateRoundsFromDifficulty = async (difficulty) => {
+  let colors;
+  switch (difficulty) {
+    case 1:
+      colors = basicColors;
+      break;
+    case 2:
+      colors = [...basicColors, ...tertiaryColors];
+      break;
+    case 3:
+      colors = allColors;
+      break;
+    default:
+      colors = allColors;
+      break;
+  }
+  const rounds = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for (const i of [...Array(difficulty).keys()]) {
+    // eslint-disable-next-line no-await-in-loop
+    const tasks = await generateTasksFromColorList(colors);
+    // eslint-disable-next-line no-await-in-loop
+    const round = await new Round({
+      name: `Round ${i}`
+    }).save();
+    // eslint-disable-next-line no-await-in-loop
+    await round.setTasks(shuffle(tasks).map((task) => task.id));
+    rounds.push(round);
+    logger.info('Round generated', { round });
+  }
+  logger.info('Rounds generated', { rounds });
+  return rounds;
 };
 
 const populateDatabase = async () => {
+  if (process.env.SECONDARY) {
+    logger.info('Secondary server, skipping population');
+    return;
+  }
   const existingGames = await Game.findAll();
   if (existingGames.length > 0) {
     logger.info('Game exists already');
     return;
   }
-
-  const tasks = new Array(15)
-    .fill(null)
-    .map(() => buildColorTask());
-
-  await Promise.all(tasks.map((task) => task.save()));
-
-  const rounds = await Promise.all(
-    [
-      new Round({
-        name: 'Easy peasy'
-      }),
-      new Round({
-        name: 'Somewhat difficult'
-      })
-    ].map((round) => round.save())
-  );
-
-  await Promise.all(rounds.map((round) => {
-    round.setTasks(shuffle(tasks)
-      .map((task) => task.id));
-    return round;
-  })
-    .map((round) => round.save()));
 
   const games = await Promise.all(
     [
@@ -94,27 +107,29 @@ const populateDatabase = async () => {
   const gameModes = await Promise.all(
     [
       new GameMode({
+        title: 'Strooped basic',
+        description: 'Strooped but with only primary and secondary colors, this is the easiest version.',
+        difficulty: 1
+      }),
+      new GameMode({
+        title: 'Strooped tertiary',
+        description: 'Like Strooped basic, but with tertiary colors included, this is version is more difficult.',
+        difficulty: 2
+      }),
+      new GameMode({
         title: 'Strooped classic',
         description: 'Standard strooped where you select the name of the color of the font',
-        difficulty: 1
+        difficulty: 3
       })
     ].map((gameMode) => gameMode.save())
   );
-
-  await gameModes[0].setRounds(rounds.map((round) => round.id));
-  await gameModes[0].setGame(games.map((game) => game.id));
-  await gameModes[0].save();
-
-  const gameRooms = await Promise.all(
-    [
-      new GameRoom({
-        joinPin: '1133456'
-      })
-    ].map((room) => room.save())
-  );
-
-  await gameRooms[0].setGameMode(gameModes.map((gameMode) => gameMode.id));
-  await gameRooms[0].save();
+  await gameModes.forEach((gameMode) => {
+    gameMode.setGame(games.map((game) => game.id));
+    generateRoundsFromDifficulty(gameMode.difficulty).then((rounds) => {
+      gameMode.setRounds(rounds.map((round) => round.id));
+      gameMode.save();
+    });
+  });
 };
 
 module.exports = {

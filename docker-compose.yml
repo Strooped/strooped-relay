@@ -47,6 +47,7 @@ services:
       DB_HOST: db
       POSTGRES_DB: strooped
       REDIS_HOST: redis
+      SECONDARY: "true"
     env_file:
       - dev.env
     ports:
