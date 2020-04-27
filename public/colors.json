@@ -20,11 +20,6 @@
     "family": "red"
   },
   {
-    "name": "LightSalmon",
-    "color": "#FFA07A",
-    "family": "red"
-  },
-  {
     "name": "Crimson",
     "color": "#DC143C",
     "family": "red"
@@ -190,11 +185,6 @@
     "family": "purple"
   },
   {
-    "name": "Magenta",
-    "color": "#FF00FF",
-    "family": "purple"
-  },
-  {
     "name": "MediumOrchid",
     "color": "#BA55D3",
     "family": "purple"
@@ -247,11 +237,6 @@
   {
     "name": "DarkSlateBlue",
     "color": "#483D8B",
-    "family": "purple"
-  },
-  {
-    "name": "MediumSlateBlue",
-    "color": "#7B68EE",
     "family": "purple"
   },
   {
@@ -368,11 +353,6 @@
     "name": "Teal",
     "color": "#008080",
     "family": "green"
-  },
-  {
-    "name": "Aqua",
-    "color": "#00FFFF",
-    "family": "blue"
   },
   {
     "name": "Cyan",
