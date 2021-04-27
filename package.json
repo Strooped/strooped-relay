@@ -31,8 +31,8 @@
     "pg-hstore": "^2.3.3",
     "sequelize": "^5.21.7",
     "snyk": "^1.311.0",
-    "socket.io": "^2.3.0",
-    "socket.io-redis": "^5.2.0",
+    "socket.io": "^3.0.0",
+    "socket.io-redis": "^5.4.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
