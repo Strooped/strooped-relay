@@ -29,7 +29,7 @@
     "morgan": "~1.10.0",
     "pg": "^7.18.2",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^5.21.7",
+    "sequelize": "^6.21.2",
     "snyk": "^1.311.0",
     "socket.io": "^2.3.0",
     "socket.io-redis": "^5.2.0",
